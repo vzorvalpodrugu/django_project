@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>
+    {{title}}
+    {% if orders %}
+        {% for order in orders %}
+            <p>
+                ID Заказа: {{ order.id }}<br>
+                Имя клиента: {{ order.client_name }}<br>
+                Дата создания: {{ order.date }}<br>
+                Мастер: {{ order.master_id }}<br>
+                Услуга: {{ order.services }}<br>
+                Статус: {{ order.status }}<br>
+            </p>
+        {% endfor %}
+    {% else %}
+        <p>Нет заказов.</p>
+    {% endif %}
+</p>
+
+{% endblock content %}

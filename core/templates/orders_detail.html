@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>
+      ID Заказа: {{ order.id }}<br>
+      Имя клиента: {{ order.client_name }}<br>
+      Дата создания: {{ order.date }}<br>
+      Мастер: {{ order.master_id }}<br>
+      Услуга: {{ order.services }}<br>
+      Статус: {{ order.status }}<br>
+</p>
+
+{% endblock content %}
