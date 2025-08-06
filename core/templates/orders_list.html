@@ -8,24 +8,7 @@
     {% if orders %}
       <div class="row">
         {% for order in orders %}
-          <div class="col-md-6 mb-3">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{{ order.client_name }}</h5>
-                <p class="card-text">
-                  Статус:
-                  {% if order.status == 'новая' %}
-                    <span class="badge bg-warning text-dark">Новая</span>
-                  {% elif order.status == 'подтверждена' %}
-                    <span class="badge bg-primary">Подтверждена</span>
-                  {% else %}
-                    <span class="badge bg-secondary">{{ order.status }}</span>
-                  {% endif %}
-                </p>
-                <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
-              </div>
-            </div>
-          </div>
+          {% include 'order_card_include.html' %}
         {% endfor %}
       </div>
     {% else %}

@@ -27,7 +27,6 @@ def orders_list(request):
         class DummyUser:
             is_staff = True
         request.user = DummyUser()
-
     if not request.user.is_staff:
         return render(request, '403.html', status=403)
     context = {
