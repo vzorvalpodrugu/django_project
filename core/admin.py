@@ -1,3 +1,8 @@
 from django.contrib import admin
+from core.models import Service, Master, Order, Review
 
-# Register your models here.
+admin.site.register(Service)
+admin.site.register(Master)
+admin.site.register(Order)
+admin.site.register(Review)
+
