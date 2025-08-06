@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-
 class Service(models.Model):
     name = models.CharField(max_length=200, verbose_name="Название")
     description = models.TextField(blank=True, verbose_name="Описание")
@@ -14,8 +13,8 @@ class Master(models.Model):
     name = models.CharField(max_length=15, verbose_name="Имя")
     photo = models.ImageField(upload_to="masters/", blank=True, verbose_name="Фотография")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
-    address = models.CharField(max_length=255, verbose_name="Адрес")
-    experience = models.PositiveIntegerField(verbose_name="Стаж работы", help_text="Опыт работы в годах")
+    address = models.CharField(max_length=255, verbose_name="Адрес", default='somewhere')
+    experience = models.PositiveIntegerField(verbose_name="Стаж работы", help_text="Опыт работы в годах", default=0)
     services = models.ManyToManyField(Service, related_name = "masters", verbose_name = "Услуги")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
 
@@ -42,7 +41,7 @@ class Order(models.Model):
     date_updated = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
     master = models.ForeignKey(Master, on_delete = models.SET_NULL, null = True, blank = True, verbose_name = "Мастер")
     services = models.ManyToManyField(Service, related_name = "orders", verbose_name = "Услуги")
-    appointment_date = models.DateTimeField(verbose_name="Дата и время записи")
+    appointment_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время записи")
 
 
 
