@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Доступ запрещён{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <h1 class="display-4 text-danger">Ошибка 403</h1>
+  <p class="lead">У вас нет прав для просмотра этой страницы.</p>
+  <a href="{% url 'landing' %}" class="btn btn-primary">На главную</a>
+</div>
+{% endblock %}
+

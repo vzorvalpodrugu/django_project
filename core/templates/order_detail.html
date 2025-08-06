@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказ №{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-8 offset-md-2">
+		<h1>Заказ №{{ order.id }}</h1>
+		<p>Дата создания: {{ order.created_at|date:"d.m.Y H:i" }}</p>
+		<p>Статус: {{ order.get_status_display }}</p>
+
+		<h2>Детали заказа</h2>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Услуга</th>
+					<th>Мастер</th>
+					<th>Дата и время</th>
+					<th>Цена</th>
+				</tr>
+			</thead>
+			<tbody>
+				  <tr>
+					<td>{{ order.services|join:", " }}</td>
+					<td>{{ order.master_id }}</td>
+					<td>{{ order.date }}</td>
+					<td>{{ order.price }} руб.</td>
+				  </tr>
+				</tbody>
+				<tfoot>
+				  <tr>
+					<td colspan="3" class="text-end"><strong>Итого:</strong></td>
+					<td><strong>{{ order.price }} руб.</strong></td>
+				  </tr>
+				</tfoot>
+		</table>
+{#		<a href="{% url 'order_list' %}" class="btn btn-secondary">Назад к списку заказов</a>#}
+{#		{% if order.status == 'new' %}#}
+{#		<a href="{% url 'order_cancel' order.id %}" class="btn btn-danger">Отменить заказ</a>#}
+{#		{% endif %}#}
+	</div>
+</div>
+{% endblock content %}

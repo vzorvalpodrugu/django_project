@@ -1,17 +1,57 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-{% for master in masters%}
-<p>
-   ID Мастера: {{ master.id }}<br>
-   Имя Мастера: {{ master.name }}<br>
-</p>
-{% endfor %}
+<section id="about" class="py-5">
+  <div class="row">
+    <div class="col-md-8 mx-auto text-center">
+      <h2>О нас</h2>
+      <p>Барбершоп "Стальная Борода" — место, где стиль и качество встречаются с профессионализмом. Мы предлагаем лучшие услуги для настоящих мужчин!</p>
+    </div>
+  </div>
+</section>
 
-{% for service in services%}
-<p>
-   Название услуги: {{ service }}<br>
-</p>
-{% endfor %}
+<section id="services" class="py-5 bg-light">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <h2 class="text-center">Услуги</h2>
+      <ul class="list-group list-group-flush">
+        {% for service in services %}
+          <li class="list-group-item">{{ service }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
 
-{% endblock content %}
+<section id="masters" class="py-5">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <h2 class="text-center">Мастера</h2>
+      <div class="row">
+        {% for master in masters %}
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ master.name }}</h5>
+                <p class="card-text">ID: {{ master.id }}</p>
+                <!-- Можно добавить описание мастера -->
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="booking" class="py-5 bg-light">
+  <div class="row">
+    <div class="col-md-8 mx-auto text-center">
+      <h2>Запись</h2>
+      <p>Оставьте заявку на стрижку или бритье — мы свяжемся с вами для подтверждения!</p>
+      <a href="{% url 'thanks' %}" class="btn btn-primary">Записаться</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

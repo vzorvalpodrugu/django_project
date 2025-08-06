@@ -1,23 +1,36 @@
 {% extends "base.html" %}
+{% block title %}Список заявок{% endblock %}
 
 {% block content %}
-
-<p>
-    {{title}}
+<section class="py-5">
+  <div class="container">
+    <h2 class="mb-4">Список заявок</h2>
     {% if orders %}
+      <div class="row">
         {% for order in orders %}
-            <p>
-                ID Заказа: {{ order.id }}<br>
-                Имя клиента: {{ order.client_name }}<br>
-                Дата создания: {{ order.date }}<br>
-                Мастер: {{ order.master_id }}<br>
-                Услуга: {{ order.services }}<br>
-                Статус: {{ order.status }}<br>
-            </p>
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ order.client_name }}</h5>
+                <p class="card-text">
+                  Статус:
+                  {% if order.status == 'новая' %}
+                    <span class="badge bg-warning text-dark">Новая</span>
+                  {% elif order.status == 'подтверждена' %}
+                    <span class="badge bg-primary">Подтверждена</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ order.status }}</span>
+                  {% endif %}
+                </p>
+                <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+              </div>
+            </div>
+          </div>
         {% endfor %}
+      </div>
     {% else %}
-        <p>Нет заказов.</p>
+      <p>Заявок нет.</p>
     {% endif %}
-</p>
-
-{% endblock content %}
+  </div>
+</section>
+{% endblock %}

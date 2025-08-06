@@ -35,7 +35,8 @@ orders = [
         "services": ["Стрижка под 'Горшок'", "Полировка лысины до блеска"],
         "master_id": 1,
         "date": "2025-03-20",
-        "status": STATUS_NEW
+        "status": STATUS_NEW,
+        "price": 1500
     },
     {
         "id": 2,

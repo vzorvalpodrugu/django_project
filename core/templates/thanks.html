@@ -1,7 +1,59 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Спасибо за заявку{% endblock %}
 
 {% block content %}
-<p>
-    {{ text }}
-</p>
-{% endblock content %}
+<section class="py-5 text-center">
+  <div class="container">
+    <h1 class="display-4">Спасибо за заявку!</h1>
+    <p class="lead">Мы свяжемся с вами в ближайшее время для подтверждения.</p>
+    <p id="countdown" class="text-muted" data-redirect-url="{% url 'landing' %}"></p>
+    <a href="{% url 'landing' %}" class="btn btn-primary mt-3">Вернуться на главную</a>
+  </div>
+</section>
+{% endblock %}
+
+{#Целый час убил на то, чтобы получился обратный отсчет, почему-то не работает#}
+{#Как я выяснил с подкючением скрипта всё ОК! А вот сам скрипт у меня в хроме не срабатывает#}
+{#Пропускаю этот этап, иду дальше, иначе без клавы останусь#}
+
+{#{% block scripts %}#}
+{#	<script src="{% static 'js/thanks.js' %}"></script>#}
+{#{% endblock %}#}
+
+{#<script>#}
+{#	console.log('Скрипт загружен!', { countdownElement, redirectUrl });#}
+{#		document.addEventListener('DOMContentLoaded', () => {#}
+{#	  const countdownElement = document.getElementById('countdown');#}
+{##}
+{#	  // Проверяем, существует ли элемент#}
+{#	  if (!countdownElement) {#}
+{#		console.error('Элемент #countdown не найден!');#}
+{#		return;#}
+{#	  }#}
+{##}
+{#	  const redirectUrl = countdownElement.dataset.redirectUrl;#}
+{##}
+{#	  // Проверяем, задан ли URL для перенаправления#}
+{#	  if (!redirectUrl) {#}
+{#		console.error('Атрибут data-redirect-url не указан!');#}
+{#		return;#}
+{#	  }#}
+{##}
+{#	  let seconds = 10;#}
+{##}
+{#	  function updateCountdown() {#}
+{#		if (seconds > 0) {#}
+{#		  countdownElement.textContent = `Вы будете перенаправлены на главную через ${seconds} секунд...`;#}
+{#		  seconds--;#}
+{#		} else {#}
+{#		  clearInterval(intervalId);#}
+{#		  window.location.href = redirectUrl;#}
+{#		}#}
+{#	  }#}
+
+{#	  updateCountdown(); // Первый запуск#}
+{#	  const intervalId = setInterval(updateCountdown, 1000);#}
+{#	});#}
+{#</script>#}
