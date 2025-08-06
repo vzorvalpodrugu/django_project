@@ -35,10 +35,7 @@
 				</tfoot>
 		</table>
 		<a href="{% url 'landing' %}" class="btn btn-primary mt-3">Вернуться на главную</a>
-{#		<a href="{% url 'order_list' %}" class="btn btn-secondary">Назад к списку заказов</a>#}
-{#		{% if order.status == 'new' %}#}
-{#		<a href="{% url 'order_cancel' order.id %}" class="btn btn-danger">Отменить заказ</a>#}
-{#		{% endif %}#}
+		<a href="{% url 'orders_list' %}" class="btn btn-secondary">Назад к списку заказов</a>
 	</div>
 </div>
 {% endblock content %}
