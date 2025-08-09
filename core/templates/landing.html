@@ -3,55 +3,136 @@
 
 {% block content %}
 <section id="about" class="py-5">
-  <div class="row">
-    <div class="col-md-8 mx-auto text-center">
-      <h2>О нас</h2>
-      <p>Барбершоп "Стальная Борода" — место, где стиль и качество встречаются с профессионализмом. Мы предлагаем лучшие услуги для настоящих мужчин!</p>
-    </div>
-  </div>
-</section>
-
-<section id="services" class="py-5 bg-light">
-  <div class="row">
-    <div class="col-md-8 mx-auto">
-      <h2 class="text-center">Услуги</h2>
-      <ul class="list-group list-group-flush">
-        {% for service in services %}
-          <li class="list-group-item">{{ service }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-</section>
-
-<section id="masters" class="py-5">
-  <div class="row">
-    <div class="col-md-8 mx-auto">
-      <h2 class="text-center">Мастера</h2>
-      <div class="row">
-        {% for master in masters %}
-          <div class="col-md-6 mb-3">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{{ master.name }}</h5>
-                <p class="card-text">ID: {{ master.id }}</p>
-                <!-- Можно добавить описание мастера -->
-              </div>
-            </div>
-          </div>
-        {% endfor %}
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h2 class="display-5 fw-bold mb-4">О нас</h2>
+        <p class="lead text-muted">Барбершоп "Стальная Борода" — место, где стиль и качество встречаются с профессионализмом. Наши мастера создадут идеальный образ именно для вас.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section id="booking" class="py-5 bg-light">
-  <div class="row">
-    <div class="col-md-8 mx-auto text-center">
-      <h2>Запись</h2>
-      <p>Оставьте заявку на стрижку или бритье — мы свяжемся с вами для подтверждения!</p>
-      <a href="{% url 'thanks' %}" class="btn btn-primary">Записаться</a>
+<section id="services" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="display-5 fw-bold text-center mb-5">Наши услуги</h2>
+    <div class="row g-4">
+      {% for service in services %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title fw-bold">{{ service.name }}</h5>
+            <p class="card-text text-muted">{{ service.description }}</p>
+            <span class="badge bg-primary rounded-pill px-3 py-2">{{ service.price }} руб.</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
-{% endblock %}
+
+<section id="masters" class="py-5">
+  <div class="container">
+    <h2 class="display-5 fw-bold text-center mb-4">Наши мастера</h2>
+    <div class="row g-3 justify-content-center">
+      {% for master in masters %}
+      <div class="col-md-6 col-lg-4 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden">
+          {% if master.photo %}
+          <img src="{{ master.photo.url }}" class="card-img-top object-fit-cover" alt="{{ master.name }}" style="height: 220px;">
+          {% else %}
+          <img src="{% static 'img/default-master.jpg' %}" class="card-img-top object-fit-cover" alt="{{ master.name }}" style="height: 220px;">
+          {% endif %}
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title fw-bold mb-0 fs-6">{{ master.name }}</h5>
+              <span class="badge bg-warning text-dark rounded-pill fs-7">Стаж: {{ master.experience }}г</span>
+            </div>
+            <div class="mb-2">
+              {% for service in master.services.all|slice:":3" %}
+              <span class="badge bg-light text-dark me-1 mb-1 fs-7">{{ service.name }}</span>
+              {% endfor %}
+              {% if master.services.all.count > 3 %}
+              <span class="badge bg-light text-dark fs-7">+{{ master.services.all.count|add:"-3" }}</span>
+              {% endif %}
+            </div>
+            <div class="d-flex align-items-center text-muted small mb-1">
+              <i class="bi bi-telephone me-1"></i>
+              <span>{{ master.phone }}</span>
+            </div>
+          </div>
+          <div class="card-footer bg-white border-0 py-2 px-3">
+            <a href="#booking" class="btn btn-primary btn-sm w-100">Записаться</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Блок отзывов -->
+<section id="reviews" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="display-5 fw-bold text-center mb-4">Отзывы клиентов</h2>
+
+    <div class="row g-3 justify-content-center">
+      {% for review in reviews %}
+      {% if review.is_published %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+          <div class="card-body p-3">
+            <!-- Заголовок с именем и рейтингом -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="card-title fw-bold mb-0 fs-6">
+                {{ review.client_name|default:"Анонимный клиент" }}
+              </h5>
+              <div class="text-warning small">
+                {% if review.rating >= 1 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                {% if review.rating >= 2 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                {% if review.rating >= 3 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                {% if review.rating >= 4 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                {% if review.rating >= 5 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+              </div>
+            </div>
+
+            <!-- Текст отзыва -->
+            <p class="card-text text-muted mb-2 small">
+              "{{ review.text|truncatechars:120 }}"
+            </p>
+
+            <!-- Футер с мастером и датой -->
+            <div class="d-flex justify-content-between align-items-center mt-auto">
+              <small class="text-primary">
+                <i class="bi bi-scissors me-1"></i> {{ review.master.name }}
+              </small>
+              <small class="text-muted">
+                {{ review.created_at|date:"d.m.Y" }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% empty %}
+      <div class="col-12 text-center">
+        <p class="text-muted">Пока нет отзывов. Будьте первым!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="booking" class="py-5 bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h2 class="display-5 fw-bold mb-4">Записаться на прием</h2>
+        <p class="lead text-muted mb-5">Выберите удобное время и мастера для получения безупречного сервиса</p>
+        <a href="{% url 'thanks' %}" class="btn btn-primary btn-lg px-5 py-3">Онлайн-запись</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}

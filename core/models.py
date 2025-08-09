@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Q
 
 class Service(models.Model):
     name = models.CharField(max_length=200, verbose_name="Название")
@@ -28,18 +29,19 @@ class Master(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('not_approved', 'Не подтверждён'),
+        ('new', 'Новая'),
         ('approved', 'Подтверждён'),
-        ('canceled', 'Отменён'),
-    ]
+        ('completed', 'Выполнена'),
+        ('cancelled', 'Отменён'),
+        ]
 
     client_name = models.CharField(max_length=100, verbose_name="Имя клиента")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
     comment = models.TextField(blank=True, verbose_name="Комментарий")
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="not_approved", verbose_name="Статус")
-    date_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
-    date_updated = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
-    master = models.ForeignKey(Master, on_delete = models.SET_NULL, null = True, blank = True, verbose_name = "Мастер")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new", verbose_name="Статус")
+    date_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания", null=True, blank=True)
+    date_updated = models.DateTimeField(auto_now=True, verbose_name="Дата обновления", null=True, blank=True)
+    master = models.ForeignKey(Master, on_delete = models.SET_NULL, verbose_name = "Мастер", related_name="orders", null=True, blank=True)
     services = models.ManyToManyField(Service, related_name = "orders", verbose_name = "Услуги")
     appointment_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время записи")
 

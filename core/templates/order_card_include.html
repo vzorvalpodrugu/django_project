@@ -1,18 +1,25 @@
 <div class="col-md-6 mb-3">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{{ order.client_name }}</h5>
-                <p class="card-text">
-                  Статус:
-                  {% if order.status == 'новая' %}
-                    <span class="badge bg-warning text-dark">Новая</span>
-                  {% elif order.status == 'подтверждена' %}
-                    <span class="badge bg-primary">Подтверждена</span>
-                  {% else %}
-                    <span class="badge bg-secondary">{{ order.status }}</span>
-                  {% endif %}
-                </p>
-                <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
-              </div>
-            </div>
-          </div>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ order.client_name }}</h5>
+      <p class="card-text">
+        Статус:
+        {% if order.status == 'new' %}
+          <span class="badge bg-warning text-dark">Новый</span>
+        {% elif order.status == 'approved' %}
+          <span class="badge bg-primary">Подтвержден</span>
+        {% elif order.status == 'completed' %}
+          <span class="badge bg-success">Завершён</span>
+        {% elif order.status == 'cancelled' %}
+          <span class="badge bg-danger">Отменён</span>
+        {% endif %}
+      </p>
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+        <a href="{% url 'order_update' order.id %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-pencil"></i> Редактировать
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
