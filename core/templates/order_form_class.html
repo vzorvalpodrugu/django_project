@@ -1,18 +1,74 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-	<div class="container">
-		<div class="row justify-content-center">
-			<div class="col-md-8">
-				<div class="card mt-5">
-					<div class="card-body text-center">
-						<h1 class="card-title">Запись на приём</h1>
-						<form action="" method="post">
-							{% csrf_token %}
-							{{ form.as_p }}
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card mt-5 shadow">
+                <div class="card-header bg-dark text-white">
+                    <h2 class="card-title mb-0 text-center">{{ title }}</h2>
+                </div>
+                <div class="card-body">
+                    <form action="" method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Основные поля формы -->
+                        <div class="mb-4">
+                            <label for="{{ form.client_name.id_for_label }}" class="form-label fw-bold">Имя клиента</label>
+                            {{ form.client_name }}
+                            {% if form.client_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.client_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label fw-bold">Номер телефона</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.phone.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label fw-bold">Комментарий</label>
+                            {{ form.comment }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.master.id_for_label }}" class="form-label fw-bold">Мастер</label>
+                            {{ form.master }}
+                        </div>
+
+                        <!-- Блок услуг с сохранением функциональности -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-block text-center mb-3">Выберите услуги</label>
+                            <div id="services-container" class="d-flex flex-wrap justify-content-center gap-3">
+                                <!-- Чекбоксы будут добавляться JavaScript'ом -->
+                            </div>
+                            {% if form.services.errors %}
+                                <div class="invalid-feedback d-block text-center">
+                                    {% for error in form.services.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-dark btn-lg">{{ button_text }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="{% static 'js/order_form.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/order_form.css'%}">
+
 {% endblock content %}
+

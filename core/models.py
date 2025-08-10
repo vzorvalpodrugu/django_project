@@ -48,6 +48,13 @@ class Order(models.Model):
 
 
 class Review(models.Model):
+    RATING_CHOICES = [
+        (1, '1 - Плохо'),
+        (2, '2 - Удовлетворительно'),
+        (3, '3 - Хорошо'),
+        (4, '4 - Очень хорошо'),
+        (5, '5 - Отлично')
+    ]
     text = models.TextField(verbose_name="Текст отзыва")
     client_name = models.CharField(max_length=100, blank=True, verbose_name="Имя клиента")
     master = models.ForeignKey(Master, on_delete = models.CASCADE, verbose_name = "Мастер")
@@ -55,6 +62,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     rating = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
-        verbose_name="Оценка"
+        verbose_name="Оценка",
+        choices=RATING_CHOICES,
     )
     is_published = models.BooleanField(default=True, verbose_name="Опубликован")

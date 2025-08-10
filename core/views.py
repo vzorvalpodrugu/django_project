@@ -5,7 +5,8 @@ from core.data import masters, services, orders
 from core.models import Master, Order, Review
 from django.db.models import Q
 from django.shortcuts import redirect
-from .forms import OrderForm
+from .forms import OrderForm, ReviewModelForm
+from django.http import JsonResponse
 
 # from django.contrib.auth.models import User
 #
@@ -13,6 +14,15 @@ from .forms import OrderForm
 # user.is_staff = True
 # user.save()
 
+def get_master_services(request):
+    master_id = request.GET.get('master_id')
+    try:
+        master = Master.objects.get(id=master_id)
+        services = master.services.all()
+        services_data = [{'id': service.id, 'name': service.name} for service in services]
+        return JsonResponse({'services' : services_data})
+    except Master.DoesNotExist:
+        return JsonResponse({'error': 'Master not found'}, status=404)
 
 def landing(request):
     masters_db = Master.objects.all()
@@ -119,9 +129,18 @@ def order_create(request):
             'button_text': "Записаться",
             "form": form,
         }
-
         return render(request, 'order_form_class.html', context)
-    if request.method == 'POST':
+
+    elif request.method == 'POST':
+        form = OrderForm(request.POST)
+        if not form.is_valid():
+            context = {
+                'title': 'Заявка на стрижку',
+                'button_text' : "Записаться",
+                'form': form,
+            }
+            return render(request, 'order_form_class.html', context)
+
         client_name = request.POST['client_name']
         phone = request.POST['phone']
         comment = request.POST['comment']
@@ -130,10 +149,12 @@ def order_create(request):
             return render(request, 'order_form.html')
 
         order = Order.objects.create(
-            client_name = client_name,
-            phone = phone,
-            comment = comment,
+            client_name = form.cleaned_data['client_name'],
+            phone = form.cleaned_data['phone'],
+            comment = form.cleaned_data['comment'],
+            master = form.cleaned_data.get('master'),
         )
+        order.services.set(form.cleaned_data['services'])
         return redirect(thanks)
 
 def order_update(request, order_id):
@@ -143,24 +164,60 @@ def order_update(request, order_id):
         except Order.DoesNotExist:
             return HTTPResponse("Заявка не найдена", status=404)
 
+        initial = {
+            'client_name': order.client_name,
+            'phone': order.phone,
+            'comment': order.comment,
+            'master': order.master,
+            "services": order.services.all()
+        }
+        form = OrderForm(initial=initial)
+
         context = {
             "title": "Редактирование заявки",
             'button_text': "Сохранить",
-            "order": order
+            "order": order,
+            "form": form,
         }
 
-        return render(request, 'order_form.html', context)
-    if request.method == 'POST':
-        client_name = request.POST['client_name']
-        phone = request.POST['phone']
-        comment = request.POST['comment']
+        return render(request, 'order_form_class.html', context)
+    elif request.method == 'POST':
+        form = OrderForm(request.POST)
+        if not form.is_valid():
+            context = {
+                "title": "Редактирование заявки",
+                'button_text': "Сохранить",
+                "form": form,
+            }
+            return render(request, 'order_form_class.html', context)
 
-        if not client_name or not phone:
-            return render(request, 'order_form.html')
+        order = Order.objects.get(id=order_id)
+        order.client_name = form.cleaned_data['client_name']
+        order.phone = form.cleaned_data['phone']
+        order.comment = form.cleaned_data['comment']
+        order.master = form.cleaned_data.get('master')
+        order.services.set(form.cleaned_data['services'])
+        order.save()
 
-        order = Order.objects.filter(id=order_id).update(
-            client_name = client_name,
-            phone = phone,
-            comment = comment,
-        )
-        return redirect(thanks)
+        return redirect('thanks')
+
+def reviews_create(request):
+    if request.method == 'GET':
+        form = ReviewModelForm()
+        context = {
+            "title": "Отзыв",
+            'button_text': "Отправить отзыв",
+            "form": form,
+        }
+        return render(request, 'review_form.html', context)
+    elif request.method == 'POST':
+        form = ReviewModelForm(request.POST, request.FILES)
+        if not form.is_valid():
+            context = {
+                "title": "Отзыв",
+                'button_text': "Отправить отзыв",
+                "form": form,
+            }
+            return render(request, 'review_form.html', context, {'form': form})
+        form.save()
+        return redirect('thanks')
