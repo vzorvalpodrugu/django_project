@@ -10,6 +10,13 @@ class Service(models.Model):
     is_popular = models.BooleanField(default=False, verbose_name="Популярная услуга")
     image = models.ImageField(upload_to="services/", blank=True, verbose_name="Изображение")
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Услуга"
+        verbose_name_plural = "Услуги"
+
 class Master(models.Model):
     name = models.CharField(max_length=15, verbose_name="Имя")
     photo = models.ImageField(upload_to="masters/", blank=True, verbose_name="Фотография")
@@ -22,9 +29,9 @@ class Master(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    # class Meta:
-    #     verbose_name = "Мастер"
-    #     verbose_name_plural = 'Мастера'
+    class Meta:
+        verbose_name = "Мастер"
+        verbose_name_plural = 'Мастера'
 
 
 class Order(models.Model):
@@ -45,9 +52,23 @@ class Order(models.Model):
     services = models.ManyToManyField(Service, related_name = "orders", verbose_name = "Услуги")
     appointment_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время записи")
 
+    def __str__(self):
+        return f'{self.client_name} + {self.services.name}'
+
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+
 
 
 class Review(models.Model):
+    AI_CHOICES = [
+        ("ai_checked_true", "Проверено ИИ"),
+        ("ai_cancelled", "Отменено ИИ"),
+        ("ai_checked_in_progress", "В процессе проверки"),
+        ("ai_checked_false", "Не проверено"),
+    ]
+
     RATING_CHOICES = [
         (1, '1 - Плохо'),
         (2, '2 - Удовлетворительно'),
@@ -65,4 +86,19 @@ class Review(models.Model):
         verbose_name="Оценка",
         choices=RATING_CHOICES,
     )
-    is_published = models.BooleanField(default=True, verbose_name="Опубликован")
+    is_published = models.BooleanField(default=False,
+                                       verbose_name="Опубликован")
+
+    ai_checked_status = models.CharField(
+        max_length=30,
+        choices=AI_CHOICES,
+        default="ai_checked_false",
+        verbose_name="Статус ИИ",
+    )
+
+    def __str__(self):
+        return f'{self.client_name} + {self.rating}'
+
+    class Meta:
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"

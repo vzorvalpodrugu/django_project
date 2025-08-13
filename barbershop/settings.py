@@ -18,6 +18,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -92,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -115,3 +116,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MISTRAL_MODERATIOINS_GRADES = {
+    'hate_and_dicrimination' : 0.1,
+    'sexual' : 0.1,
+    'violence_and_threats' : 0.1,
+    'dangerous_and_criminal_content' : 0.1,
+    'selfharm' : 0.1,
+    'health' : 0.1,
+    'financial' : 0.1,
+    'law' : 0.1,
+    'pii' : 0.1,
+}
