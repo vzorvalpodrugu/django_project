@@ -4,12 +4,20 @@ from .views import (
     CustomLoginView,
     CustomLogoutView,
     RegisterView,
-    CustomPasswordChangeForm, CustomPasswordChangeView,
+    CustomPasswordChangeView,
+    CustomPasswordResetView,
+    CustomPasswordResetDoneView,
 )
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', CustomLoginView.as_view() , name='login'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
-    path('change_password/', CustomPasswordChangeView.as_view() , name='password_change'),
+    path('password_change/', CustomPasswordChangeView.as_view() , name='password_change'),
+
+    # Восстановление пароля
+    # Шаг 2. Ввод email
+    path('password-reset/', CustomPasswordResetView.as_view() , name='password_reset'),
+    # Шаг 3. Вы получили инструкцию на почту
+    path('password-reset/done/', CustomPasswordResetDoneView.as_view() , name='password_reset_done'),
 ]
