@@ -1,0 +1,23 @@
+.toast-container {
+  z-index: 1055 !important; /* Важно, чтобы быть поверх других элементов */
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1100;
+}
+
+.toast:not(.show) {
+    display: block;
+}
+.toast-body {
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 0.25rem;
+}
+.bg-success { background-color: #198754 !important; }
+.bg-error, .bg-danger { background-color: #dc3545 !important; }
+.bg-warning { background-color: #ffc107 !important; }
+.bg-info { background-color: #0dcaf0 !important; }

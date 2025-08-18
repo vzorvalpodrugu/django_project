@@ -53,7 +53,8 @@ class Order(models.Model):
     appointment_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время записи")
 
     def __str__(self):
-        return f'{self.client_name} + {self.services.name}'
+        services = ", ".join([s.name for s in self.services.all()])
+        return f'{self.client_name} - {services}'
 
     class Meta:
         verbose_name = "Заказ"

@@ -25,7 +25,30 @@
     </header>
     <main>
       <div class="container">
-        {% block content %}{% endblock %}
+        {% block content %}
+		  
+	  	{% endblock %}
+		  
+	  	
+		<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    {% for message in messages %}
+    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="toast-header">
+            <strong class="me-auto">
+                {% if message.tags == 'error' %}Ошибка
+                {% elif message.tags == 'success' %}Успех
+                {% elif message.tags == 'warning' %}Предупреждение
+                {% else %}Информация{% endif %}
+            </strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body bg-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} text-white">
+            {{ message }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+    </div>
       </div>
     </main>
     <footer class="mt-5 bg-light py-3">

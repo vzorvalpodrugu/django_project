@@ -2,11 +2,11 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-sc7c8d-l0v+9=$i#jaeg5!qhsl0*etw!*vvce@amx4*!t&k9ea'
 
@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    'core'
+    'core',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +129,14 @@ MISTRAL_MODERATIOINS_GRADES = {
     'law' : 0.1,
     'pii' : 0.1,
 }
+
+TELEGRAM_BOT_API_KEY = os.getenv('TELEGRAM_BOT_API_KEY')
+TELEGRAM_USER_ID = os.getenv('TELEGRAM_USER_ID')
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/' # Куда перенаправить после успешного входа
+LOGOUT_REDIRECT_URL = '/' # Куда перенаправить после выхода
+
+SESSION_COOKIE_AGE = 120
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

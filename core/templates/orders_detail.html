@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <p>
       ID Заказа: {{ order.id }}<br>
       Имя клиента: {{ order.client_name }}<br>
-      Дата создания: {{ order.date }}<br>
-      Мастер: {{ order.master_id }}<br>
-      Услуга: {{ order.services }}<br>
-      Статус: {{ order.status }}<br>
+      Дата создания: {{ order.date_created|date:"d.m.Y H:i" }}<br>
+      Мастер: {{ order.master.name }}<br>
+      Услуга: {% for service in order.services.all %}{{ service.name }}{% if not forloop.last %}, {% endif %}{% endfor %}<br>
+      Статус: {{ order.get_status_display }}<br>
 </p>
-
 {% endblock content %}

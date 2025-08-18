@@ -2,222 +2,209 @@ from http.client import HTTPResponse
 
 from django.shortcuts import render
 from core.data import masters, services, orders
-from core.models import Master, Order, Review
+from core.models import Master, Order, Review, Service
 from django.db.models import Q
 from django.shortcuts import redirect
-from .forms import OrderForm, ReviewModelForm
+from .forms import OrderForm, ReviewModelForm, OrderModelForm
 from django.http import JsonResponse
-
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView, ListView, DetailView
+from django.views import View
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse, reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 # from django.contrib.auth.models import User
 #
 # user = User.objects.get(username='your_username')
 # user.is_staff = True
 # user.save()
 
-def get_master_services(request):
-    master_id = request.GET.get('master_id')
-    try:
-        master = Master.objects.get(id=master_id)
-        services = master.services.all()
-        services_data = [{'id': service.id, 'name': service.name} for service in services]
-        return JsonResponse({'services' : services_data})
-    except Master.DoesNotExist:
-        return JsonResponse({'error': 'Master not found'}, status=404)
+class AdminStaffRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_staff and self.request.user.is_superuser
 
-def landing(request):
-    masters_db = Master.objects.all()
-    reviews_db = Review.objects.all()
-    context = {
-        "masters": masters_db,
-        "reviews": reviews_db,
-        "title": "Барбершоп 'Стальная Борода'",
-        "services": services
-    }
-    return render(request, 'landing.html', context)
-
-def thanks(request):
-    context = {
-        "text" : "Заявка принята!"
-    }
-    return render(request, 'thanks.html', context)
-
-
-def orders_list(request):
-    # Получаем параметры поиска
-    q = request.GET.get('q', '')
-
-    # Параметры поиска по полям
-    search_by_phone = request.GET.get('search_by_phone') == 'true'
-    search_by_name = request.GET.get('search_by_name') == 'true'
-    search_by_comment = request.GET.get('search_by_comment') == 'true'
-
-    # Параметры сортировки
-    order_by_date = request.GET.get('order_by_date', 'desc')
-
-    # Начальный запрос
-    query = Order.objects.all()
-
-    # Поиск по текстовым полям
-    if q:
-        search_q = Q()
-        if search_by_phone:
-            search_q |= Q(phone__icontains=q)
-        if search_by_name:
-            search_q |= Q(client_name__icontains=q)
-        if search_by_comment:
-            search_q |= Q(comment__icontains=q)
-        query = query.filter(search_q)
-
-    # Фильтрация по статусам
-    status_filter = Q()
-    if request.GET.get('status_new') == 'true':
-        status_filter |= Q(status='new')
-    if request.GET.get('status_approved') == 'true':
-        status_filter |= Q(status='approved')
-    if request.GET.get('status_completed') == 'true':
-        status_filter |= Q(status='completed')
-    if request.GET.get('status_cancelled') == 'true':
-        status_filter |= Q(status='cancelled')
-
-    # Применяем фильтр только если выбран хотя бы один статус
-    if any([
-        request.GET.get('status_new') == 'true',
-        request.GET.get('status_approved') == 'true',
-        request.GET.get('status_completed') == 'true',
-        request.GET.get('status_cancelled') == 'true'
-    ]):
-        query = query.filter(status_filter)
-
-    # Сортировка
-    order_field = '-date_created' if order_by_date == 'desc' else 'date_created'
-    query = query.order_by(order_field)
-
-    context = {
-        'orders': query,
-        'title': 'Список заявок',
-        'current_q': q,
-        'search_params': {
-            'by_phone': search_by_phone,
-            'by_name': search_by_name,
-            'by_comment': search_by_comment,
-        },
-        'status_new': request.GET.get('status_new') == 'true',
-        'status_approved': request.GET.get('status_approved') == 'true',
-        'status_completed': request.GET.get('status_completed') == 'true',
-        'status_cancelled': request.GET.get('status_cancelled') == 'true',
-        'order_by': order_by_date
-    }
-
-    return render(request, 'orders_list.html', context)
-
-def order_detail(request, order_id):
-    try:
-        order = [order for order in orders if order['id'] == order_id][0]
-    except IndexError:
-        return render(request, '404.html', status=404)
-
-    context = {
-        "order": order
-    }
-    return render(request, 'order_detail.html', context)
-
-def order_create(request):
-    if request.method == 'GET':
-        form = OrderForm()
-        context = {
-            "title": "Заявка на стрижку",
-            'button_text': "Записаться",
-            "form": form,
-        }
-        return render(request, 'order_form_class.html', context)
-
-    elif request.method == 'POST':
-        form = OrderForm(request.POST)
-        if not form.is_valid():
-            context = {
-                'title': 'Заявка на стрижку',
-                'button_text' : "Записаться",
-                'form': form,
-            }
-            return render(request, 'order_form_class.html', context)
-
-        client_name = request.POST['client_name']
-        phone = request.POST['phone']
-        comment = request.POST['comment']
-
-        if not client_name or not phone:
-            return render(request, 'order_form.html')
-
-        order = Order.objects.create(
-            client_name = form.cleaned_data['client_name'],
-            phone = form.cleaned_data['phone'],
-            comment = form.cleaned_data['comment'],
-            master = form.cleaned_data.get('master'),
-        )
-        order.services.set(form.cleaned_data['services'])
-        return redirect(thanks)
-
-def order_update(request, order_id):
-    if request.method == 'GET':
+class MasterServicesView(View):
+    def get(self, request):
+        master_id = request.GET.get('master_id')
         try:
-            order: Order = Order.objects.get(id=order_id)
-        except Order.DoesNotExist:
-            return HTTPResponse("Заявка не найдена", status=404)
+            master = Master.objects.get(id=master_id)
+            services = master.services.all()
+            services_data = [{'id': service.id, 'name': service.name} for service in services]
+            return JsonResponse({'services': services_data})
+        except Master.DoesNotExist:
+            return JsonResponse({'error': 'Master not found'}, status=404)
 
-        initial = {
-            'client_name': order.client_name,
-            'phone': order.phone,
-            'comment': order.comment,
-            'master': order.master,
-            "services": order.services.all()
-        }
-        form = OrderForm(initial=initial)
 
+
+class LandingView(View):
+    def get(self,request):
         context = {
-            "title": "Редактирование заявки",
-            'button_text': "Сохранить",
-            "order": order,
-            "form": form,
+            'title': 'Стальная бритва',
+            'masters': Master.objects.all()[:3],
+            'services': Service.objects.all(),
+        }
+        return render(request, 'landing.html', context)
+
+class ThanksTemplateView(TemplateView):
+    template_name = 'thanks.html'
+
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+
+class OrderListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'orders_list.html'
+    context_object_name = 'orders'
+    ordering = '-date_created'
+    paginate_by = 20  # Можно добавить пагинацию
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Получаем параметры поиска
+        q = self.request.GET.get('q', '')
+
+        # Параметры поиска по полям
+        search_by_phone = self.request.GET.get('search_by_phone') == 'true'
+        search_by_name = self.request.GET.get('search_by_name') == 'true'
+        search_by_comment = self.request.GET.get('search_by_comment') == 'true'
+
+        # Поиск по текстовым полям
+        if q:
+            search_q = Q()
+            if search_by_phone:
+                search_q |= Q(phone__icontains=q)
+            if search_by_name:
+                search_q |= Q(client_name__icontains=q)
+            if search_by_comment:
+                search_q |= Q(comment__icontains=q)
+            queryset = queryset.filter(search_q)
+
+        # Фильтрация по статусам
+        status_filter = Q()
+        status_params = {
+            'status_new': 'new',
+            'status_approved': 'approved',
+            'status_completed': 'completed',
+            'status_cancelled': 'cancelled'
         }
 
-        return render(request, 'order_form_class.html', context)
-    elif request.method == 'POST':
-        form = OrderForm(request.POST)
-        if not form.is_valid():
-            context = {
-                "title": "Редактирование заявки",
-                'button_text': "Сохранить",
-                "form": form,
-            }
-            return render(request, 'order_form_class.html', context)
+        # Собираем фильтры по статусам
+        applied_filters = False
+        for param, status in status_params.items():
+            if self.request.GET.get(param) == 'true':
+                status_filter |= Q(status=status)
+                applied_filters = True
 
-        order = Order.objects.get(id=order_id)
-        order.client_name = form.cleaned_data['client_name']
-        order.phone = form.cleaned_data['phone']
-        order.comment = form.cleaned_data['comment']
-        order.master = form.cleaned_data.get('master')
-        order.services.set(form.cleaned_data['services'])
-        order.save()
+        if applied_filters:
+            queryset = queryset.filter(status_filter)
 
-        return redirect('thanks')
+        # Сортировка
+        order_by_date = self.request.GET.get('order_by_date', 'desc')
+        if order_by_date == 'asc':
+            queryset = queryset.order_by('date_created')
+        else:
+            queryset = queryset.order_by('-date_created')
 
-def reviews_create(request):
-    if request.method == 'GET':
-        form = ReviewModelForm()
-        context = {
-            "title": "Отзыв",
-            'button_text': "Отправить отзыв",
-            "form": form,
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Добавляем все параметры поиска в контекст
+        context['title'] = 'Список заявок'
+        context['current_q'] = self.request.GET.get('q', '')
+        context['search_params'] = {
+            'by_phone': self.request.GET.get('search_by_phone') == 'true',
+            'by_name': self.request.GET.get('search_by_name') == 'true',
+            'by_comment': self.request.GET.get('search_by_comment') == 'true',
         }
-        return render(request, 'review_form.html', context)
-    elif request.method == 'POST':
-        form = ReviewModelForm(request.POST, request.FILES)
-        if not form.is_valid():
-            context = {
-                "title": "Отзыв",
-                'button_text': "Отправить отзыв",
-                "form": form,
-            }
-            return render(request, 'review_form.html', context, {'form': form})
-        form.save()
-        return redirect('thanks')
+        context.update({
+            'status_new': self.request.GET.get('status_new') == 'true',
+            'status_approved': self.request.GET.get(
+                'status_approved') == 'true',
+            'status_completed': self.request.GET.get(
+                'status_completed') == 'true',
+            'status_cancelled': self.request.GET.get(
+                'status_cancelled') == 'true',
+            'order_by': self.request.GET.get('order_by_date', 'desc')
+        })
+
+        return context
+
+class OrderDetailView(DetailView):
+    model = Order
+    template_name = 'order_detail.html'
+    pk_url_kwarg = 'order_id'
+    context_object_name = 'order'
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        print(f"Найден заказ: {obj}")  # Проверьте в консоли сервера
+        print(f"Мастер: {obj.master}")
+        print(f"Услуги: {list(obj.services.all())}")
+        print(f"Дата: {obj.date_created}")
+        return obj
+
+class OrderCreateView(CreateView):
+    model = Order
+    form_class = OrderModelForm
+    template_name = 'order_form_class.html'
+    success_url = reverse_lazy('thanks')
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderCreateView, self).get_context_data(**kwargs)
+        context['title'] = 'Заявка на стрижку'
+        context['button_text'] = "Записаться"
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, "Заказ успешно принят.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Форма неверно заполнена!")
+        return super().form_invalid(form)
+
+class OrderUpdateView(UpdateView):
+    model = Order
+    form_class = OrderModelForm
+    template_name = 'order_form_class.html'
+    success_url = reverse_lazy('orders_list')
+    pk_url_kwarg = 'order_id'
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderUpdateView, self).get_context_data(**kwargs)
+        context['title'] = 'Обновить заявку на стрижку'
+        context['button_text'] = "Обновить"
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, "Заказ обновлен.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Форма неверно заполнена!")
+        return super().form_invalid(form)
+
+class ReviewCreateView(AdminStaffRequiredMixin, CreateView):
+    model = Review
+    form_class = ReviewModelForm
+    template_name = 'review_form.html'
+    success_url = reverse_lazy('thanks')
+
+    def get_context_data(self, **kwargs):
+        context = super(ReviewCreateView, self).get_context_data(**kwargs)
+        context['title'] = 'Оставить отзыв'
+        context['button_text'] = 'Отправить отзыв'
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, "Отзыв успешно отправлен")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Форма неверно заполнена!")
+        return super().form_invalid(form)
+

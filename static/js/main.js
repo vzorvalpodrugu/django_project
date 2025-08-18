@@ -58,3 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+ const toastElList = document.querySelectorAll(".toast");
+  const toastList = [...toastElList].map((toastEl) => {
+    const toast = new bootstrap.Toast(toastEl, {
+      delay: 5000, // 5 секунд
+    });
+    toast.show();
+    return toast;
+  });

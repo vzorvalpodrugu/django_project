@@ -6,13 +6,14 @@
 <div class="row">
 	<div class="col-md-8 offset-md-2">
 		<h1>Заказ №{{ order.id }}</h1>
-		<p>Дата создания: {{ order.created_at|date:"d.m.Y H:i" }}</p>
+		<p>Дата создания: {{ order.date_created|date:"d.m.Y H:i" }}</p>
 		<p>Статус: {{ order.get_status_display }}</p>
 
 		<h2>Детали заказа</h2>
 		<table class="table">
 			<thead>
 				<tr>
+					<th>Имя клиента</th>
 					<th>Услуга</th>
 					<th>Мастер</th>
 					<th>Дата и время</th>
@@ -21,9 +22,14 @@
 			</thead>
 			<tbody>
 				  <tr>
-					<td>{{ order.services|join:", " }}</td>
+					  <td>{{ order.client_name}}</td>
+					<td>{% for service in order.services.all %}
+						{{ service.name }}
+						{% if not forloop.last %}
+						{% endif %}
+						{% endfor %}</td>
 					<td>{{ order.master_id }}</td>
-					<td>{{ order.date }}</td>
+					<td>{{ order.date_created|date:"d.m.Y H:i" }}</td>
 					<td>{{ order.price }} руб.</td>
 				  </tr>
 				</tbody>
