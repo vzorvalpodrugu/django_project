@@ -7,6 +7,8 @@ from .views import (
     CustomPasswordChangeView,
     CustomPasswordResetView,
     CustomPasswordResetDoneView,
+    CustomPasswordResetConfirmView,
+    CustomPasswordResetCompleteView,
 )
 
 urlpatterns = [
@@ -20,4 +22,8 @@ urlpatterns = [
     path('password-reset/', CustomPasswordResetView.as_view() , name='password_reset'),
     # Шаг 3. Вы получили инструкцию на почту
     path('password-reset/done/', CustomPasswordResetDoneView.as_view() , name='password_reset_done'),
+    # Шаг 5. Ввод нового пароля
+    path('password-reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    # Шаг 6. Сообщение об успешном успехе
+    path('password-reset/complete', CustomPasswordResetCompleteView.as_view(), name = 'password_reset_complete'),
 ]
