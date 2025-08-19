@@ -21,15 +21,27 @@ class OrderForm(forms.Form):
     )
     master = forms.ModelChoiceField(
         label='Master',
-        queryset=Master.objects.all(),
+        queryset=Master.objects.none(),
         required=False,
-        initial=Master.objects.all().first(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
     )
     services = forms.ModelMultipleChoiceField(
         label='',
         queryset=Service.objects.all(),
         widget=forms.CheckboxSelectMultiple(attrs = {'placeholder': ''}),
     )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        master_field = self.fields['master']
+        if isinstance(self.fields['master'], forms.ModelMultipleChoiceField):
+            master_field.queryset = Master.objects.all()
+            try:
+                master_field.initial = Master.objects.get(
+                    name__contains = 'Мастер 1'
+                )
+            except (Master.DoesNotExist, Master.MultipleObjectsReturned):
+                pass
+
     def clean(self):
         cleaned_data = super().clean()
         client_name = cleaned_data.get('client_name', '')

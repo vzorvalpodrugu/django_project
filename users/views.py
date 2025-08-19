@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model, login as auth_login, logout as auth_logout
 from django.views.decorators.http import require_POST
 from .forms import CustomAuthenticationForm, CustomUserCreationForm, \
@@ -15,8 +15,32 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import PasswordResetForm
 from django.views.generic import CreateView
 from django.contrib import messages
+from .models import CustomUser
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import DetailView, UpdateView
+from .forms import UserProfileUpdateForm
 
 User = get_user_model()
+
+class UserProfileDetailView(LoginRequiredMixin, DetailView):
+    model = CustomUser
+    template_name = "users/profile_detail.html"
+    context_object_name = "profile"
+
+    def get_object(self, queryset=None):
+        # Пользователь может смотреть только свой профиль
+        return get_object_or_404(CustomUser, pk=self.request.user.pk)
+
+
+class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = UserProfileUpdateForm
+    template_name = "users/profile_update_form.html"
+    success_url = reverse_lazy("profile-detail")
+
+    def get_object(self, queryset=None):
+        # Пользователь может редактировать только свой профиль
+        return get_object_or_404(CustomUser, pk=self.request.user.pk)
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'users/password_reset_form.html'

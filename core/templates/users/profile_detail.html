@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Профиль пользователя</h2>
+    <div class="card p-3">
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="Аватар" width="150" class="mb-3 rounded-circle">
+        {% endif %}
+        <p><strong>Имя пользователя:</strong> {{ profile.username }}</p>
+        <p><strong>Email:</strong> {{ profile.email }}</p>
+        <p><strong>Telegram ID:</strong> {{ profile.tg_id }}</p>
+        <p><strong>VK ID:</strong> {{ profile.vk_id }}</p>
+
+        <a href="{% url 'profile-update' %}" class="btn btn-primary mt-3">Редактировать профиль</a>
+    </div>
+</div>
+{% endblock %}

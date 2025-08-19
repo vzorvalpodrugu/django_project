@@ -10,8 +10,22 @@ from django.contrib.auth.forms import (
 )
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from .models import CustomUser
 
 user_model = get_user_model()
+
+class UserProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email", "avatar", "tg_id", "vk_id"]
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "avatar": forms.FileInput(attrs={"class": "form-control"}),
+            "tg_id": forms.TextInput(attrs={"class": "form-control"}),
+            "vk_id": forms.TextInput(attrs={"class": "form-control"}),
+        }
+
 
 class CustomPasswordResetForm(PasswordResetForm):
     """

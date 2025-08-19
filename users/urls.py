@@ -9,6 +9,8 @@ from .views import (
     CustomPasswordResetDoneView,
     CustomPasswordResetConfirmView,
     CustomPasswordResetCompleteView,
+    UserProfileDetailView,
+    UserProfileUpdateView,
 )
 
 urlpatterns = [
@@ -26,4 +28,8 @@ urlpatterns = [
     path('password-reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     # Шаг 6. Сообщение об успешном успехе
     path('password-reset/complete', CustomPasswordResetCompleteView.as_view(), name = 'password_reset_complete'),
+
+    # Урлы на профиль
+    path("profile/", UserProfileDetailView.as_view(), name="profile-detail"),
+    path("profile/edit/", UserProfileUpdateView.as_view(), name="profile-update"),
 ]
