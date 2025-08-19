@@ -59,6 +59,10 @@ class OrderForm(forms.Form):
             )
         return data
 
+    @property
+    def price(self):
+        return sum(service.price for service in self.services.all())
+
 class OrderModelForm(forms.ModelForm):
     class Meta:
         model = Order
@@ -90,6 +94,8 @@ class OrderModelForm(forms.ModelForm):
             # ),
             "services": forms.SelectMultiple(attrs={"class": "form-control"}),
         }
+
+
 
     def clean_phone(self):
         data = self.cleaned_data["phone"]

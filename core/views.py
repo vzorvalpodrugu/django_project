@@ -109,30 +109,6 @@ class OrderListView(LoginRequiredMixin, ListView):
 
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Добавляем все параметры поиска в контекст
-        context['title'] = 'Список заявок'
-        context['current_q'] = self.request.GET.get('q', '')
-        context['search_params'] = {
-            'by_phone': self.request.GET.get('search_by_phone') == 'true',
-            'by_name': self.request.GET.get('search_by_name') == 'true',
-            'by_comment': self.request.GET.get('search_by_comment') == 'true',
-        }
-        context.update({
-            'status_new': self.request.GET.get('status_new') == 'true',
-            'status_approved': self.request.GET.get(
-                'status_approved') == 'true',
-            'status_completed': self.request.GET.get(
-                'status_completed') == 'true',
-            'status_cancelled': self.request.GET.get(
-                'status_cancelled') == 'true',
-            'order_by': self.request.GET.get('order_by_date', 'desc')
-        })
-
-        return context
-
 class OrderDetailView(DetailView):
     model = Order
     template_name = 'order_detail.html'
@@ -141,10 +117,11 @@ class OrderDetailView(DetailView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        print(f"Найден заказ: {obj}")  # Проверьте в консоли сервера
+        print(f"Найден заказ: {obj}")
         print(f"Мастер: {obj.master}")
         print(f"Услуги: {list(obj.services.all())}")
         print(f"Дата: {obj.date_created}")
+
         return obj
 
 class OrderCreateView(CreateView):
